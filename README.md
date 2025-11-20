@@ -6,6 +6,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![TD Stylekit](https://img.shields.io/badge/TD_Stylekit-30.17-purple)](https://www.npmjs.com/package/td-stylekit)
 
+**[📚 View Interactive Documentation](https://skwapong.github.io/prototype-with-foundry-agent/)**
+
 ---
 
 ## Overview
