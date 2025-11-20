@@ -354,6 +354,7 @@
                 <li><a href="#implementation">Implementation</a></li>
                 <li><a href="#configuration">Configuration</a></li>
                 <li><a href="#integration">Integration</a></li>
+                <li><a href="#deployment">🚀 Deployment</a></li>
                 <li><a href="#troubleshooting">Troubleshooting</a></li>
                 <li><a href="#best-practices">Best Practices</a></li>
             </ul>
@@ -411,9 +412,10 @@ npm run dev
                     <ol>
                         <li>Add <code>TD_API_KEY</code> to <code>.env</code> file</li>
                         <li>Add <code>TD_LLM_BASE_URL</code> to <code>.env</code> file</li>
-                        <li>Update <code>AGENT_ID</code> in <code>services/tdLlmService.ts</code></li>
+                        <li>Update <code>AGENT_ID</code> in <code>services/tdLlmService.ts</code> (see <a href="#finding-agent-id">Finding Your Agent ID</a>)</li>
                         <li>Run <code>npm run dev</code></li>
                         <li>Test at <code>http://localhost:3000</code></li>
+                        <li><strong>Deploy to Vercel</strong> (see <a href="#deployment">Deployment Guide</a>)</li>
                     </ol>
                 </div>
 
@@ -522,6 +524,34 @@ NEXT_PUBLIC_ENV=production</code></pre>
 
                 <div class="warning-box">
                     <strong>⚠️ Security Warning:</strong> Never expose your <code>TD_API_KEY</code> to the client side. Always use server-side API routes only.
+                </div>
+
+                <h3 id="finding-agent-id">🔍 Finding Your Agent ID</h3>
+                <p>Your Agent ID is required to connect your application to the correct TD Agent. Here's how to find it:</p>
+
+                <div class="info-box">
+                    <strong>Step 1: Access AI Agent Foundry</strong>
+                    <ol>
+                        <li>Log in to the <a href="https://console.treasuredata.com" target="_blank">Treasure Data Console</a></li>
+                        <li>Navigate to <strong>AI Agent Foundry</strong></li>
+                        <li>Select your agent from the projects list</li>
+                    </ol>
+                </div>
+
+                <div class="success-box">
+                    <strong>Step 2: Copy Agent ID from URL</strong>
+                    <p>When viewing your agent in AI Agent Foundry, the <strong>Agent ID</strong> appears in the browser URL bar:</p>
+                    <pre><code>https://console-development-next.us01.treasuredata.com/app/assets/releases/
+AER-114-chat-forms/index.html#/af/<span style="background: yellow; color: black; font-weight: bold;">019a555a-2d62-7d98-89d7-0ec6dfcb0fdf</span>/details</code></pre>
+                    <p><strong>The highlighted portion is your Agent ID.</strong></p>
+                    <p style="margin-top: 10px;">In the example above, the Agent ID is: <code>019a555a-2d62-7d98-89d7-0ec6dfcb0fdf</code></p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>Step 3: Update Your Code</strong>
+                    <p>Copy the Agent ID from the URL and update it in <code>services/tdLlmService.ts</code>:</p>
+                    <pre><code>// Replace with your actual Agent ID from the URL
+const AGENT_ID = '019a555a-2d62-7d98-89d7-0ec6dfcb0fdf'</code></pre>
                 </div>
             </section>
 
@@ -1043,6 +1073,126 @@ export default function ChatComponent() {
     &lt;/div&gt;
   )
 }</code></pre>
+            </section>
+
+            <!-- DEPLOYMENT SECTION -->
+            <section id="deployment" class="section">
+                <h2>🚀 Deployment to Vercel</h2>
+                <p>Deploy your TD Agent application to production with Vercel's seamless platform.</p>
+
+                <h3><span class="step-number">1</span>Install Vercel CLI</h3>
+                <p>If you haven't already, install the Vercel CLI globally:</p>
+                <pre><code>npm install -g vercel</code></pre>
+
+                <h3><span class="step-number">2</span>Deploy to Vercel</h3>
+                <p>From your project directory, run the deployment command:</p>
+                <pre><code># Navigate to your project
+cd my-td-agent-app
+
+# Deploy (follow the interactive prompts)
+vercel --prod --yes</code></pre>
+
+                <div class="info-box">
+                    <strong>What happens during deployment:</strong>
+                    <ol>
+                        <li>Vercel creates a new project (or links to existing)</li>
+                        <li>Connects to your GitHub repository (optional but recommended)</li>
+                        <li>Builds your Next.js application</li>
+                        <li>Deploys to a production URL</li>
+                    </ol>
+                </div>
+
+                <h3><span class="step-number">3</span>Configure Environment Variables</h3>
+                <p><strong>⚠️ CRITICAL:</strong> Your deployed app won't work until you add environment variables in Vercel.</p>
+
+                <h4>Option A: Via Vercel Dashboard (Recommended)</h4>
+                <ol>
+                    <li>Go to <a href="https://vercel.com/dashboard" target="_blank">https://vercel.com/dashboard</a></li>
+                    <li>Select your project</li>
+                    <li>Navigate to <strong>Settings</strong> → <strong>Environment Variables</strong></li>
+                    <li>Add the following variables for <strong>Production, Preview, and Development</strong>:</li>
+                </ol>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable Name</th>
+                            <th>Value</th>
+                            <th>Environment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>TD_API_KEY</code></td>
+                            <td>Your TD API key (1/abc...)</td>
+                            <td>Production, Preview, Development</td>
+                        </tr>
+                        <tr>
+                            <td><code>TD_LLM_BASE_URL</code></td>
+                            <td><code>https://llm-api-development.us01.treasuredata.com</code></td>
+                            <td>Production, Preview, Development</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Option B: Via Vercel CLI</h4>
+                <pre><code># Add environment variables via CLI
+vercel env add TD_API_KEY
+# Enter your API key when prompted
+# Select: Production, Preview, Development
+
+vercel env add TD_LLM_BASE_URL
+# Enter the base URL when prompted
+# Select: Production, Preview, Development</code></pre>
+
+                <h3><span class="step-number">4</span>Redeploy with Environment Variables</h3>
+                <p>After adding environment variables, you <strong>must redeploy</strong> for changes to take effect:</p>
+                <pre><code>vercel --prod</code></pre>
+
+                <div class="success-box">
+                    <strong>✅ Deployment Complete!</strong>
+                    <p>Your application is now live at: <code>https://your-project.vercel.app</code></p>
+                    <p>Vercel will also provide:</p>
+                    <ul>
+                        <li>🔗 Production URL (e.g., your-project.vercel.app)</li>
+                        <li>📊 Deployment dashboard with logs</li>
+                        <li>🔄 Automatic deployments on git push (if connected to GitHub)</li>
+                        <li>🌍 Global CDN for fast worldwide access</li>
+                    </ul>
+                </div>
+
+                <h3>Vercel Deployment Checklist</h3>
+                <div class="warning-box">
+                    <ol>
+                        <li>✅ Install Vercel CLI: <code>npm install -g vercel</code></li>
+                        <li>✅ Deploy: <code>vercel --prod --yes</code></li>
+                        <li>✅ Add environment variables in Vercel Dashboard</li>
+                        <li>✅ Redeploy: <code>vercel --prod</code></li>
+                        <li>✅ Test your live application</li>
+                        <li>✅ Connect GitHub for automatic deployments (optional)</li>
+                    </ol>
+                </div>
+
+                <h3>Troubleshooting Deployment</h3>
+                <h4>Build Errors</h4>
+                <p>If your build fails:</p>
+                <pre><code># Check build logs in Vercel dashboard
+# Or view logs via CLI
+vercel logs your-deployment-url --since 5m</code></pre>
+
+                <h4>Environment Variables Not Working</h4>
+                <ul>
+                    <li>Verify variables are added to all environments (Production, Preview, Development)</li>
+                    <li>Remember to redeploy after adding variables</li>
+                    <li>Check for typos in variable names</li>
+                </ul>
+
+                <h4>API Routes Failing</h4>
+                <ul>
+                    <li>Ensure <code>TD_API_KEY</code> starts with <code>1/</code></li>
+                    <li>Verify <code>TD_LLM_BASE_URL</code> is correct for your region</li>
+                    <li>Check Vercel function logs for detailed error messages</li>
+                </ul>
             </section>
 
             <!-- TROUBLESHOOTING SECTION -->
