@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasure Data Agent Connection Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6F2EFF 0%, #1957DB 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav a {
+            color: #6F2EFF;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: #1957DB;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #6F2EFF;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #6F2EFF;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            color: #1957DB;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            color: #495057;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #6F2EFF;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #6F2EFF;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .checklist li:before {
+            content: '☐';
+            position: absolute;
+            left: 15px;
+            font-size: 1.2em;
+            color: #6F2EFF;
+        }
+
+        .architecture-diagram {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #6F2EFF;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 10px;
+            font-weight: 500;
+        }
+
+        .arrow {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 1.5em;
+            color: #6F2EFF;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #6F2EFF;
+            text-decoration: none;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #6F2EFF;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-required {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-optional {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .nav ul {
+                flex-direction: column;
+            }
+
+            pre {
+                padding: 15px;
+                font-size: 0.8em;
+            }
+        }
+
+        .highlight-line {
+            background: #fff3cd;
+            display: block;
+            margin: -20px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Treasure Data Agent Connection Guide</h1>
+            <p>A comprehensive guide to successfully integrating TD LLM Agents into your application</p>
+        </div>
+
+        <nav class="nav">
+            <ul>
+                <li><a href="#quick-start">⚡ Quick Start</a></li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#prerequisites">Prerequisites</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#implementation">Implementation</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#integration">Integration</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#best-practices">Best Practices</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- QUICK START SECTION -->
+            <section id="quick-start" class="section">
+                <h2>⚡ Quick Start - Download & Use</h2>
+
+                <div class="success-box">
+                    <strong>🎁 Ready-to-Use Starter Template Available!</strong>
+                    <p>Skip the setup and start coding immediately with our complete working template.</p>
+                </div>
+
+                <h3>Option 1: Clone the Repository (Fastest)</h3>
+                <pre><code># Clone the complete working template
+git clone https://github.com/skwapong/paid-media-suite-demo.git my-td-agent-app
+cd my-td-agent-app
+
+# Install dependencies
+npm install
+
+# Configure credentials
+cp .env.example .env
+# Edit .env with your TD_API_KEY and TD_LLM_BASE_URL
+
+# Update agent ID in services/tdLlmService.ts
+
+# Run the app
+npm run dev
+
+# Open http://localhost:3000</code></pre>
+
+                <div class="info-box">
+                    <strong>What you get:</strong>
+                    <ul>
+                        <li>✅ Complete API proxy routes</li>
+                        <li>✅ Working chat demo component</li>
+                        <li>✅ TypeScript service client</li>
+                        <li>✅ Environment configuration templates</li>
+                        <li>✅ All documentation files</li>
+                        <li>✅ Ready for deployment</li>
+                    </ul>
+                </div>
+
+                <h3>Option 2: Download as ZIP</h3>
+                <p>Visit <a href="https://github.com/skwapong/paid-media-suite-demo" target="_blank">https://github.com/skwapong/paid-media-suite-demo</a> and click "Code" → "Download ZIP"</p>
+
+                <h3>Option 3: Follow This Guide</h3>
+                <p>Continue reading this guide to build the integration from scratch step-by-step.</p>
+
+                <div class="warning-box">
+                    <strong>⚙️ Quick Configuration Checklist:</strong>
+                    <ol>
+                        <li>Add <code>TD_API_KEY</code> to <code>.env</code> file</li>
+                        <li>Add <code>TD_LLM_BASE_URL</code> to <code>.env</code> file</li>
+                        <li>Update <code>AGENT_ID</code> in <code>services/tdLlmService.ts</code></li>
+                        <li>Run <code>npm run dev</code></li>
+                        <li>Test at <code>http://localhost:3000</code></li>
+                    </ol>
+                </div>
+
+                <h3>📚 Additional Resources in Repository</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>README.md</code></td>
+                            <td>Repository overview and quick links</td>
+                        </tr>
+                        <tr>
+                            <td><code>TD_AGENT_QUICK_START.md</code></td>
+                            <td>5-minute rapid setup guide</td>
+                        </tr>
+                        <tr>
+                            <td><code>TD_AGENT_STARTER_TEMPLATE_README.md</code></td>
+                            <td>Complete template documentation</td>
+                        </tr>
+                        <tr>
+                            <td><code>TREASURE_DATA_AGENT_CONNECTION_GUIDE.md</code></td>
+                            <td>This guide in Markdown format</td>
+                        </tr>
+                        <tr>
+                            <td><code>TREASURE_DATA_AGENT_CONNECTION_GUIDE_CONFLUENCE.txt</code></td>
+                            <td>Confluence wiki format</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- OVERVIEW SECTION -->
+            <section id="overview" class="section">
+                <h2>📖 Overview</h2>
+                <p>This guide explains how to integrate with Treasure Data's LLM Agent API to create interactive chat experiences. The implementation uses a <strong>proxy pattern</strong> where your Next.js application acts as a secure intermediary between the browser and Treasure Data's API.</p>
+
+                <div class="info-box">
+                    <strong>Why use a proxy?</strong>
+                    <ul>
+                        <li>✅ Keeps API keys secure on the server</li>
+                        <li>✅ Enables CORS handling</li>
+                        <li>✅ Provides request/response transformation</li>
+                        <li>✅ Simplifies client-side code</li>
+                    </ul>
+                </div>
+
+                <h3>What You'll Build</h3>
+                <div class="architecture-diagram">
+                    <div class="flow-step">Browser Client</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step">Next.js API Routes</div>
+                    <span class="arrow">→</span>
+                    <div class="flow-step">Treasure Data API</div>
+                </div>
+            </section>
+
+            <!-- PREREQUISITES SECTION -->
+            <section id="prerequisites" class="section">
+                <h2>📋 Prerequisites</h2>
+
+                <h3>Required Credentials</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Credential</th>
+                            <th>Format</th>
+                            <th>Where to Obtain</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>TD API Key</strong></td>
+                            <td><code>1/your-api-key-here</code></td>
+                            <td>Treasure Data Console</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Agent ID</strong></td>
+                            <td><code>019a555a-2d62-7d98-...</code></td>
+                            <td>TD Agent Builder</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Base URL</strong></td>
+                            <td><code>https://llm-api-development.us01...</code></td>
+                            <td>TD Documentation</td>
+                            <td><span class="badge badge-required">Required</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Environment Setup</h3>
+                <p>Create a <code>.env</code> file in your project root:</p>
+                <pre><code># Treasure Data LLM API Configuration
+TD_API_KEY=1/your-api-key-here
+TD_LLM_BASE_URL=https://llm-api-development.us01.treasuredata.com
+
+# Environment
+NEXT_PUBLIC_ENV=production</code></pre>
+
+                <div class="warning-box">
+                    <strong>⚠️ Security Warning:</strong> Never expose your <code>TD_API_KEY</code> to the client side. Always use server-side API routes only.
+                </div>
+            </section>
+
+            <!-- ARCHITECTURE SECTION -->
+            <section id="architecture" class="section">
+                <h2>🏗️ Architecture</h2>
+
+                <h3>High-Level Flow</h3>
+                <div class="architecture-diagram">
+                    <pre style="text-align: left; background: white; color: #333; padding: 20px;">
+┌──────────┐          ┌──────────────┐          ┌─────────────┐
+│  Browser │  ────>   │   Next.js    │  ────>   │  Treasure   │
+│  Client  │          │  API Routes  │          │  Data API   │
+└──────────┘          └──────────────┘          └─────────────┘
+     │                      │                          │
+     │  1. Create chat      │                          │
+     │  ──────────────────> │  Forward with API key    │
+     │                      │  ──────────────────────> │
+     │                      │  <────────────────────── │
+     │  <────────────────── │     Return chat ID       │
+     │                      │                          │
+     │  2. Send message     │                          │
+     │  ──────────────────> │  Stream request          │
+     │                      │  ──────────────────────> │
+     │  <~~~~sse stream~~~~ │  <~~~~sse stream~~~~~~~ │</pre>
+                </div>
+
+                <h3>Component Breakdown</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Location</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Client Service</strong></td>
+                            <td><code>services/tdLlmService.ts</code></td>
+                            <td>Handles chat sessions, streaming, attachments</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Create Chat Endpoint</strong></td>
+                            <td><code>pages/api/chats.ts</code></td>
+                            <td>Proxies chat session creation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Continue Chat Endpoint</strong></td>
+                            <td><code>pages/api/chats/[id]/continue.ts</code></td>
+                            <td>Proxies message streaming</td>
+                        </tr>
+                        <tr>
+                            <td><strong>History Endpoint</strong></td>
+                            <td><code>pages/api/chats/[id]/history.ts</code></td>
+                            <td>Retrieves chat history</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- IMPLEMENTATION SECTION -->
+            <section id="implementation" class="section">
+                <h2>⚙️ Step-by-Step Implementation</h2>
+
+                <h3><span class="step-number">1</span>Create API Proxy Routes</h3>
+
+                <h4>1.1 Create Chat Session Endpoint</h4>
+                <p><strong>File:</strong> <code>pages/api/chats.ts</code></p>
+                <pre><code>import type { NextApiRequest, NextApiResponse } from 'next';
+import { Readable } from 'stream';
+
+// Disable default body parser
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+// Helper to read raw request body
+async function getRawBody(readable: Readable): Promise&lt;Buffer&gt; {
+  const chunks: Buffer[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const apiKey = process.env.TD_API_KEY;
+  const baseUrl = process.env.TD_LLM_BASE_URL ||
+    'https://llm-api-development.us01.treasuredata.com';
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key not configured' });
+  }
+
+  // Parse request body manually
+  let requestBody = null;
+  try {
+    const rawBody = await getRawBody(req);
+    requestBody = JSON.parse(rawBody.toString('utf8'));
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  try {
+    // Forward to TD API
+    const response = await fetch(`${baseUrl}/api/chats`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `TD1 ${apiKey}`,
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'application/vnd.api+json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      return res.status(response.status).json({
+        error: 'API request failed',
+        details: errorDetails,
+      });
+    }
+
+    const data = await response.json();
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Proxy request failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}</code></pre>
+
+                <h4>1.2 Create Continue Chat Endpoint</h4>
+                <p><strong>File:</strong> <code>pages/api/chats/[id]/continue.ts</code></p>
+                <pre><code>import type { NextApiRequest, NextApiResponse } from 'next';
+import { Readable } from 'stream';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+async function getRawBody(readable: Readable): Promise&lt;Buffer&gt; {
+  const chunks: Buffer[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const apiKey = process.env.TD_API_KEY;
+  const baseUrl = process.env.TD_LLM_BASE_URL ||
+    'https://llm-api-development.us01.treasuredata.com';
+  const { id } = req.query;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key not configured' });
+  }
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Chat ID is required' });
+  }
+
+  // Parse request body
+  let requestBody = null;
+  try {
+    const rawBody = await getRawBody(req);
+    requestBody = JSON.parse(rawBody.toString('utf8'));
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/api/chats/${id}/continue`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `TD1 ${apiKey}`,
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      return res.status(response.status).json({
+        error: 'API request failed',
+        details: errorDetails,
+      });
+    }
+
+    // Stream the response
+    if (response.body) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          res.write(chunk);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
+      return res.end();
+    }
+
+    return res.status(500).json({ error: 'No response body' });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Proxy request failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}</code></pre>
+
+                <h3><span class="step-number">2</span>Create Client Service</h3>
+                <p><strong>File:</strong> <code>services/tdLlmService.ts</code></p>
+                <pre><code>// Type definitions
+interface FileAttachment {
+  binaryBase64: string
+  contentType: string
+  fileName: string
+  attachmentType: 'image' | 'document'
+  inputFieldName?: string
+}
+
+interface StreamEvent {
+  content?: string
+  tool_call?: any
+  tool_response?: any
+  error?: string
+  streamingError?: boolean
+}
+
+// Replace with your actual agent ID
+const AGENT_ID = '019a555a-2d62-7d98-89d7-0ec6dfcb0fdf'
+
+class TDLLMService {
+  private baseUrl: string = ''
+  private currentChatId: string | null = null
+  private currentAbortController: AbortController | null = null
+
+  private buildHeaders(stream = false): Record&lt;string, string&gt; {
+    const headers: Record&lt;string, string&gt; = {
+      'Content-Type': 'application/vnd.api+json'
+    }
+    if (stream) {
+      headers['Accept'] = 'text/event-stream'
+    }
+    return headers
+  }
+
+  // Create new chat session
+  async createChatSession(): Promise&lt;string&gt; {
+    const payload = {
+      data: {
+        type: 'chats',
+        attributes: { agentId: AGENT_ID }
+      }
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/chats`, {
+      method: 'POST',
+      headers: this.buildHeaders(false),
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create chat: ${response.status}`)
+    }
+
+    const result = await response.json()
+    this.currentChatId = result.data.id
+    return this.currentChatId
+  }
+
+  // Send message and stream response
+  async *continueChatStream(
+    userMessage: string,
+    attachments?: FileAttachment[]
+  ): AsyncGenerator&lt;StreamEvent, void, unknown&gt; {
+    if (!this.currentChatId) {
+      throw new Error('No active chat session')
+    }
+
+    this.currentAbortController = new AbortController()
+
+    const payload: any = { input: userMessage }
+    if (attachments?.length) {
+      payload.attachments = attachments
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}/api/chats/${this.currentChatId}/continue`,
+      {
+        method: 'POST',
+        headers: this.buildHeaders(true),
+        body: JSON.stringify(payload),
+        signal: this.currentAbortController.signal
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Stream failed: ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('No stream reader')
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      while (buffer.includes('\n')) {
+        const line = buffer.slice(0, buffer.indexOf('\n')).trim()
+        buffer = buffer.slice(buffer.indexOf('\n') + 1)
+
+        if (line.startsWith('data:')) {
+          const eventData = line.slice(5).trim()
+          if (eventData && eventData !== '[DONE]') {
+            try {
+              const eventJson = JSON.parse(eventData)
+              if (eventJson.content) {
+                yield { content: eventJson.content }
+              }
+              if (eventJson.error) {
+                yield { error: eventJson.error, streamingError: true }
+              }
+            } catch (e) {
+              console.warn('Parse error:', e)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  abortCurrentRequest(): void {
+    this.currentAbortController?.abort()
+    this.currentAbortController = null
+  }
+
+  resetChatSession(): void {
+    this.currentChatId = null
+    this.abortCurrentRequest()
+  }
+}
+
+export const tdLlmService = new TDLLMService()
+export default TDLLMService</code></pre>
+            </section>
+
+            <!-- CONFIGURATION SECTION -->
+            <section id="configuration" class="section">
+                <h2>🔧 Configuration</h2>
+
+                <h3>Update Agent ID</h3>
+                <p>In <code>services/tdLlmService.ts</code>, replace the agent ID with your actual agent ID from TD Agent Builder:</p>
+                <pre><code>const AGENT_ID = 'your-actual-agent-id-here'</code></pre>
+
+                <h3>Environment Variables</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>TD_API_KEY</code></td>
+                            <td><span class="badge badge-required">Required</span></td>
+                            <td>Your TD API authentication key</td>
+                        </tr>
+                        <tr>
+                            <td><code>TD_LLM_BASE_URL</code></td>
+                            <td><span class="badge badge-required">Required</span></td>
+                            <td>TD LLM API endpoint URL</td>
+                        </tr>
+                        <tr>
+                            <td><code>NEXT_PUBLIC_ENV</code></td>
+                            <td><span class="badge badge-optional">Optional</span></td>
+                            <td>Environment identifier</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- INTEGRATION SECTION -->
+            <section id="integration" class="section">
+                <h2>🔌 Client-Side Integration</h2>
+
+                <h3>Basic Usage</h3>
+                <pre><code>import { tdLlmService } from '@/services/tdLlmService'
+
+async function startChat() {
+  // 1. Create chat session
+  const chatId = await tdLlmService.createChatSession()
+
+  // 2. Send message and stream response
+  const stream = tdLlmService.continueChatStream('Hello!')
+
+  // 3. Process stream
+  for await (const event of stream) {
+    if (event.content) {
+      console.log('Content:', event.content)
+    } else if (event.error) {
+      console.error('Error:', event.error)
+    }
+  }
+}</code></pre>
+
+                <h3>React Component Example</h3>
+                <pre><code>import { useState, useEffect } from 'react'
+import { tdLlmService } from '@/services/tdLlmService'
+
+export default function ChatComponent() {
+  const [messages, setMessages] = useState&lt;string[]&gt;([])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() =&gt; {
+    tdLlmService.createChatSession()
+  }, [])
+
+  const handleSend = async () =&gt; {
+    if (!input.trim()) return
+
+    const userMessage = input
+    setInput('')
+    setIsLoading(true)
+    setMessages(prev =&gt; [...prev, `User: ${userMessage}`])
+
+    try {
+      let assistantMessage = ''
+      const stream = tdLlmService.continueChatStream(userMessage)
+
+      for await (const event of stream) {
+        if (event.content) {
+          assistantMessage += event.content
+          setMessages(prev =&gt; {
+            const newMessages = [...prev]
+            const lastIndex = newMessages.length - 1
+            if (newMessages[lastIndex]?.startsWith('Assistant:')) {
+              newMessages[lastIndex] = `Assistant: ${assistantMessage}`
+            } else {
+              newMessages.push(`Assistant: ${assistantMessage}`)
+            }
+            return newMessages
+          })
+        }
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;div style={{ height: '400px', overflowY: 'auto' }}&gt;
+        {messages.map((msg, i) =&gt; (
+          &lt;div key={i}&gt;{msg}&lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+      &lt;input
+        value={input}
+        onChange={(e) =&gt; setInput(e.target.value)}
+        onKeyPress={(e) =&gt; e.key === 'Enter' && handleSend()}
+        disabled={isLoading}
+      /&gt;
+      &lt;button onClick={handleSend} disabled={isLoading}&gt;
+        {isLoading ? 'Sending...' : 'Send'}
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+            </section>
+
+            <!-- TROUBLESHOOTING SECTION -->
+            <section id="troubleshooting" class="section">
+                <h2>🔍 Common Issues & Solutions</h2>
+
+                <h3>Issue 1: "API key not configured" Error</h3>
+                <div class="error-box">
+                    <strong>Cause:</strong> Environment variables not loaded properly
+                </div>
+                <div class="success-box">
+                    <strong>Solution:</strong>
+                    <pre><code># Verify .env file exists
+cat .env
+
+# Restart dev server
+npm run dev
+
+# For production, set variables in Vercel</code></pre>
+                </div>
+
+                <h3>Issue 2: CORS Errors</h3>
+                <div class="error-box">
+                    <strong>Cause:</strong> Missing CORS headers in API routes
+                </div>
+                <div class="success-box">
+                    <strong>Solution:</strong> Ensure all API routes include:
+                    <pre><code>res.setHeader('Access-Control-Allow-Origin', '*')
+res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')</code></pre>
+                </div>
+
+                <h3>Issue 3: Body Parsing Errors</h3>
+                <div class="error-box">
+                    <strong>Cause:</strong> Vercel doesn't parse <code>application/vnd.api+json</code> by default
+                </div>
+                <div class="success-box">
+                    <strong>Solution:</strong> Disable body parser and parse manually:
+                    <pre><code>export const config = {
+  api: {
+    bodyParser: false,
+  },
+}</code></pre>
+                </div>
+
+                <h3>Issue 4: 401 Unauthorized</h3>
+                <div class="error-box">
+                    <strong>Cause:</strong> Invalid or expired API key
+                </div>
+                <div class="success-box">
+                    <strong>Solution:</strong>
+                    <ul>
+                        <li>Verify API key in TD console</li>
+                        <li>Check key format: <code>TD1 1/your-api-key-here</code></li>
+                        <li>Ensure key has proper permissions</li>
+                    </ul>
+                </div>
+
+                <h3>Issue 5: 404 Agent Not Found</h3>
+                <div class="error-box">
+                    <strong>Cause:</strong> Invalid agent ID
+                </div>
+                <div class="success-box">
+                    <strong>Solution:</strong>
+                    <ul>
+                        <li>Verify agent ID in TD Agent Builder</li>
+                        <li>Ensure agent is published and active</li>
+                        <li>Check agent ID format (UUID)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- BEST PRACTICES SECTION -->
+            <section id="best-practices" class="section">
+                <h2>⭐ Best Practices</h2>
+
+                <h3>Security</h3>
+                <div class="warning-box">
+                    <ul>
+                        <li>✅ Always use server-side API routes</li>
+                        <li>✅ Store credentials in environment variables</li>
+                        <li>✅ Use <code>.env.local</code> for local development (git-ignored)</li>
+                        <li>❌ Never expose API keys client-side</li>
+                        <li>❌ Never commit <code>.env</code> files to git</li>
+                    </ul>
+                </div>
+
+                <h3>Performance</h3>
+                <div class="info-box">
+                    <ul>
+                        <li>✅ Use streaming for better UX</li>
+                        <li>✅ Update UI incrementally as content arrives</li>
+                        <li>✅ Implement proper error handling</li>
+                        <li>✅ Abort long-running requests when needed</li>
+                    </ul>
+                </div>
+
+                <h3>Code Organization</h3>
+                <div class="success-box">
+                    <ul>
+                        <li>✅ Separate service layer from UI components</li>
+                        <li>✅ Use TypeScript interfaces for type safety</li>
+                        <li>✅ Add comprehensive logging</li>
+                        <li>✅ Write unit tests for critical paths</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- QUICK START CHECKLIST -->
+            <section id="checklist" class="section">
+                <h2>✅ Quick Start Checklist</h2>
+                <ul class="checklist">
+                    <li>Set up environment variables (<code>.env</code>)</li>
+                    <li>Create API proxy routes (<code>pages/api/chats*.ts</code>)</li>
+                    <li>Create client service (<code>services/tdLlmService.ts</code>)</li>
+                    <li>Update agent ID in service</li>
+                    <li>Test chat session creation</li>
+                    <li>Test message streaming</li>
+                    <li>Implement error handling</li>
+                    <li>Add file attachment support (if needed)</li>
+                    <li>Deploy to production</li>
+                    <li>Monitor logs and performance</li>
+                </ul>
+            </section>
+
+            <!-- KEY TAKEAWAYS -->
+            <section id="takeaways" class="section">
+                <h2>💡 Key Takeaways</h2>
+                <div class="info-box">
+                    <ol>
+                        <li><strong>Always use server-side proxy</strong> - Never expose API keys to the browser</li>
+                        <li><strong>Handle <code>application/vnd.api+json</code></strong> - Disable default body parser</li>
+                        <li><strong>Stream responses</strong> - Use SSE for better user experience</li>
+                        <li><strong>Proper error handling</strong> - Gracefully handle all error cases</li>
+                        <li><strong>Type safety</strong> - Use TypeScript interfaces throughout</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+
+        <div class="footer">
+            <p><strong>Treasure Data Agent Connection Guide</strong> | Version 1.0.0</p>
+            <p>Created: January 20, 2025</p>
+            <p>For support: <a href="https://docs.treasuredata.com">TD Documentation</a></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,756 @@
+h1. 🚀 Treasure Data Agent Connection Guide
+
+{panel:title=Overview|borderStyle=solid|borderColor=#6F2EFF|titleBGColor=#6F2EFF|bgColor=#F8F9FA}
+A comprehensive guide to successfully integrating TD LLM Agents into your application.
+{panel}
+
+----
+
+h2. ⚡ Quick Start - Download & Use
+
+{panel:title=🎁 Ready-to-Use Starter Template Available!|borderStyle=solid|borderColor=#28a745|titleBGColor=#28a745|bgColor=#d4edda}
+Skip the setup and start coding immediately with our complete working template.
+{panel}
+
+h3. Option 1: Clone the Repository (Fastest)
+
+{code:language=bash}
+# Clone the complete working template
+git clone https://github.com/skwapong/paid-media-suite-demo.git my-td-agent-app
+cd my-td-agent-app
+
+# Install dependencies
+npm install
+
+# Configure credentials
+cp .env.example .env
+# Edit .env with your TD_API_KEY and TD_LLM_BASE_URL
+
+# Update agent ID in services/tdLlmService.ts
+
+# Run the app
+npm run dev
+
+# Open http://localhost:3000
+{code}
+
+{info:title=What you get}
+* ✅ Complete API proxy routes
+* ✅ Working chat demo component
+* ✅ TypeScript service client
+* ✅ Environment configuration templates
+* ✅ All documentation files
+* ✅ Ready for deployment
+{info}
+
+h3. Option 2: Download as ZIP
+
+Visit [https://github.com/skwapong/paid-media-suite-demo] and click *Code* → *Download ZIP*
+
+h3. Option 3: Follow This Guide
+
+Continue reading this guide to build the integration from scratch step-by-step.
+
+{warning:title=⚙️ Quick Configuration Checklist}
+# Add {{TD_API_KEY}} to {{.env}} file
+# Add {{TD_LLM_BASE_URL}} to {{.env}} file
+# Update {{AGENT_ID}} in {{services/tdLlmService.ts}}
+# Run {{npm run dev}}
+# Test at {{http://localhost:3000}}
+{warning}
+
+h3. 📚 Additional Resources in Repository
+
+|| File || Description ||
+| {{README.md}} | Repository overview and quick links |
+| {{TD_AGENT_QUICK_START.md}} | 5-minute rapid setup guide |
+| {{TD_AGENT_STARTER_TEMPLATE_README.md}} | Complete template documentation |
+| {{TREASURE_DATA_AGENT_CONNECTION_GUIDE.md}} | This guide in Markdown format |
+| {{TREASURE_DATA_AGENT_CONNECTION_GUIDE_CONFLUENCE.txt}} | Confluence wiki format |
+
+----
+
+h2. 📖 Overview
+
+This guide explains how to integrate with Treasure Data's LLM Agent API to create interactive chat experiences. The implementation uses a *proxy pattern* where your Next.js application acts as a secure intermediary between the browser and Treasure Data's API.
+
+{info:title=Why use a proxy?}
+* ✅ Keeps API keys secure on the server
+* ✅ Enables CORS handling
+* ✅ Provides request/response transformation
+* ✅ Simplifies client-side code
+{info}
+
+h3. What You'll Build
+
+{noformat}
+┌──────────┐          ┌──────────────┐          ┌─────────────┐
+│  Browser │  ────>   │   Next.js    │  ────>   │  Treasure   │
+│  Client  │          │  API Routes  │          │  Data API   │
+└──────────┘          └──────────────┘          └─────────────┘
+{noformat}
+
+----
+
+h2. 📋 Prerequisites
+
+h3. Required Credentials
+
+|| Credential || Format || Where to Obtain || Required ||
+| *TD API Key* | {{1/your-api-key-here}} | Treasure Data Console | (!) Required |
+| *Agent ID* | {{019a555a-2d62-7d98-...}} | TD Agent Builder | (!) Required |
+| *Base URL* | {{https://llm-api-development.us01...}} | TD Documentation | (!) Required |
+
+h3. Environment Setup
+
+Create a {{.env}} file in your project root:
+
+{code:language=bash}
+# Treasure Data LLM API Configuration
+TD_API_KEY=1/your-api-key-here
+TD_LLM_BASE_URL=https://llm-api-development.us01.treasuredata.com
+
+# Environment
+NEXT_PUBLIC_ENV=production
+{code}
+
+{warning:title=Security Warning}
+⚠️ Never expose your {{TD_API_KEY}} to the client side. Always use server-side API routes only.
+{warning}
+
+----
+
+h2. 🏗️ Architecture
+
+h3. High-Level Flow
+
+{noformat}
+┌──────────┐          ┌──────────────┐          ┌─────────────┐
+│  Browser │  ────>   │   Next.js    │  ────>   │  Treasure   │
+│  Client  │          │  API Routes  │          │  Data API   │
+└──────────┘          └──────────────┘          └─────────────┘
+     │                      │                          │
+     │  1. Create chat      │                          │
+     │  ──────────────────> │  Forward with API key    │
+     │                      │  ──────────────────────> │
+     │                      │  <────────────────────── │
+     │  <────────────────── │     Return chat ID       │
+     │                      │                          │
+     │  2. Send message     │                          │
+     │  ──────────────────> │  Stream request          │
+     │                      │  ──────────────────────> │
+     │  <~~~~sse stream~~~~ │  <~~~~sse stream~~~~~~~ │
+{noformat}
+
+h3. Component Breakdown
+
+|| Component || Location || Purpose ||
+| *Client Service* | {{services/tdLlmService.ts}} | Handles chat sessions, streaming, attachments |
+| *Create Chat Endpoint* | {{pages/api/chats.ts}} | Proxies chat session creation |
+| *Continue Chat Endpoint* | {{pages/api/chats/\[id\]/continue.ts}} | Proxies message streaming |
+| *History Endpoint* | {{pages/api/chats/\[id\]/history.ts}} | Retrieves chat history |
+
+----
+
+h2. ⚙️ Step-by-Step Implementation
+
+h3. Step 1: Create API Proxy Routes
+
+h4. 1.1 Create Chat Session Endpoint
+
+*File:* {{pages/api/chats.ts}}
+
+{code:language=typescript|collapse=true}
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Readable } from 'stream';
+
+// Disable default body parser
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+// Helper to read raw request body
+async function getRawBody(readable: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const apiKey = process.env.TD_API_KEY;
+  const baseUrl = process.env.TD_LLM_BASE_URL ||
+    'https://llm-api-development.us01.treasuredata.com';
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key not configured' });
+  }
+
+  // Parse request body manually
+  let requestBody = null;
+  try {
+    const rawBody = await getRawBody(req);
+    requestBody = JSON.parse(rawBody.toString('utf8'));
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  try {
+    // Forward to TD API
+    const response = await fetch(`${baseUrl}/api/chats`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `TD1 ${apiKey}`,
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'application/vnd.api+json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      return res.status(response.status).json({
+        error: 'API request failed',
+        details: errorDetails,
+      });
+    }
+
+    const data = await response.json();
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Proxy request failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+{code}
+
+h4. 1.2 Create Continue Chat Endpoint
+
+*File:* {{pages/api/chats/\[id\]/continue.ts}}
+
+{code:language=typescript|collapse=true}
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Readable } from 'stream';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+async function getRawBody(readable: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const apiKey = process.env.TD_API_KEY;
+  const baseUrl = process.env.TD_LLM_BASE_URL ||
+    'https://llm-api-development.us01.treasuredata.com';
+  const { id } = req.query;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'API key not configured' });
+  }
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Chat ID is required' });
+  }
+
+  // Parse request body
+  let requestBody = null;
+  try {
+    const rawBody = await getRawBody(req);
+    requestBody = JSON.parse(rawBody.toString('utf8'));
+  } catch (error) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/api/chats/${id}/continue`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `TD1 ${apiKey}`,
+        'Content-Type': 'application/vnd.api+json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      return res.status(response.status).json({
+        error: 'API request failed',
+        details: errorDetails,
+      });
+    }
+
+    // Stream the response
+    if (response.body) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          res.write(chunk);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+
+      return res.end();
+    }
+
+    return res.status(500).json({ error: 'No response body' });
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Proxy request failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+{code}
+
+h3. Step 2: Create Client Service
+
+*File:* {{services/tdLlmService.ts}}
+
+{code:language=typescript|collapse=true}
+// Type definitions
+interface FileAttachment {
+  binaryBase64: string
+  contentType: string
+  fileName: string
+  attachmentType: 'image' | 'document'
+  inputFieldName?: string
+}
+
+interface StreamEvent {
+  content?: string
+  tool_call?: any
+  tool_response?: any
+  error?: string
+  streamingError?: boolean
+}
+
+// Replace with your actual agent ID
+const AGENT_ID = '019a555a-2d62-7d98-89d7-0ec6dfcb0fdf'
+
+class TDLLMService {
+  private baseUrl: string = ''
+  private currentChatId: string | null = null
+  private currentAbortController: AbortController | null = null
+
+  private buildHeaders(stream = false): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/vnd.api+json'
+    }
+    if (stream) {
+      headers['Accept'] = 'text/event-stream'
+    }
+    return headers
+  }
+
+  // Create new chat session
+  async createChatSession(): Promise<string> {
+    const payload = {
+      data: {
+        type: 'chats',
+        attributes: { agentId: AGENT_ID }
+      }
+    }
+
+    const response = await fetch(`${this.baseUrl}/api/chats`, {
+      method: 'POST',
+      headers: this.buildHeaders(false),
+      body: JSON.stringify(payload)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create chat: ${response.status}`)
+    }
+
+    const result = await response.json()
+    this.currentChatId = result.data.id
+    return this.currentChatId
+  }
+
+  // Send message and stream response
+  async *continueChatStream(
+    userMessage: string,
+    attachments?: FileAttachment[]
+  ): AsyncGenerator<StreamEvent, void, unknown> {
+    if (!this.currentChatId) {
+      throw new Error('No active chat session')
+    }
+
+    this.currentAbortController = new AbortController()
+
+    const payload: any = { input: userMessage }
+    if (attachments?.length) {
+      payload.attachments = attachments
+    }
+
+    const response = await fetch(
+      `${this.baseUrl}/api/chats/${this.currentChatId}/continue`,
+      {
+        method: 'POST',
+        headers: this.buildHeaders(true),
+        body: JSON.stringify(payload),
+        signal: this.currentAbortController.signal
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Stream failed: ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('No stream reader')
+
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      while (buffer.includes('\n')) {
+        const line = buffer.slice(0, buffer.indexOf('\n')).trim()
+        buffer = buffer.slice(buffer.indexOf('\n') + 1)
+
+        if (line.startsWith('data:')) {
+          const eventData = line.slice(5).trim()
+          if (eventData && eventData !== '[DONE]') {
+            try {
+              const eventJson = JSON.parse(eventData)
+              if (eventJson.content) {
+                yield { content: eventJson.content }
+              }
+              if (eventJson.error) {
+                yield { error: eventJson.error, streamingError: true }
+              }
+            } catch (e) {
+              console.warn('Parse error:', e)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  abortCurrentRequest(): void {
+    this.currentAbortController?.abort()
+    this.currentAbortController = null
+  }
+
+  resetChatSession(): void {
+    this.currentChatId = null
+    this.abortCurrentRequest()
+  }
+}
+
+export const tdLlmService = new TDLLMService()
+export default TDLLMService
+{code}
+
+----
+
+h2. 🔧 Configuration
+
+h3. Update Agent ID
+
+In {{services/tdLlmService.ts}}, replace the agent ID:
+
+{code:language=typescript}
+const AGENT_ID = 'your-actual-agent-id-here'
+{code}
+
+h3. Environment Variables
+
+|| Variable || Required || Description ||
+| {{TD_API_KEY}} | (!) Required | Your TD API authentication key |
+| {{TD_LLM_BASE_URL}} | (!) Required | TD LLM API endpoint URL |
+| {{NEXT_PUBLIC_ENV}} | (/) Optional | Environment identifier |
+
+----
+
+h2. 🔌 Client-Side Integration
+
+h3. Basic Usage
+
+{code:language=typescript}
+import { tdLlmService } from '@/services/tdLlmService'
+
+async function startChat() {
+  // 1. Create chat session
+  const chatId = await tdLlmService.createChatSession()
+
+  // 2. Send message and stream response
+  const stream = tdLlmService.continueChatStream('Hello!')
+
+  // 3. Process stream
+  for await (const event of stream) {
+    if (event.content) {
+      console.log('Content:', event.content)
+    } else if (event.error) {
+      console.error('Error:', event.error)
+    }
+  }
+}
+{code}
+
+h3. React Component Example
+
+{code:language=typescript|collapse=true}
+import { useState, useEffect } from 'react'
+import { tdLlmService } from '@/services/tdLlmService'
+
+export default function ChatComponent() {
+  const [messages, setMessages] = useState<string[]>([])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    tdLlmService.createChatSession()
+  }, [])
+
+  const handleSend = async () => {
+    if (!input.trim()) return
+
+    const userMessage = input
+    setInput('')
+    setIsLoading(true)
+    setMessages(prev => [...prev, `User: ${userMessage}`])
+
+    try {
+      let assistantMessage = ''
+      const stream = tdLlmService.continueChatStream(userMessage)
+
+      for await (const event of stream) {
+        if (event.content) {
+          assistantMessage += event.content
+          setMessages(prev => {
+            const newMessages = [...prev]
+            const lastIndex = newMessages.length - 1
+            if (newMessages[lastIndex]?.startsWith('Assistant:')) {
+              newMessages[lastIndex] = `Assistant: ${assistantMessage}`
+            } else {
+              newMessages.push(`Assistant: ${assistantMessage}`)
+            }
+            return newMessages
+          })
+        }
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div>
+      <div style={{ height: '400px', overflowY: 'auto' }}>
+        {messages.map((msg, i) => (
+          <div key={i}>{msg}</div>
+        ))}
+      </div>
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+        disabled={isLoading}
+      />
+      <button onClick={handleSend} disabled={isLoading}>
+        {isLoading ? 'Sending...' : 'Send'}
+      </button>
+    </div>
+  )
+}
+{code}
+
+----
+
+h2. 🔍 Common Issues & Solutions
+
+h3. Issue 1: "API key not configured" Error
+
+{panel:title=Cause|borderStyle=solid|borderColor=#dc3545|bgColor=#f8d7da}
+Environment variables not loaded properly
+{panel}
+
+{panel:title=Solution|borderStyle=solid|borderColor=#28a745|bgColor=#d4edda}
+{code:language=bash}
+# Verify .env file exists
+cat .env
+
+# Restart dev server
+npm run dev
+
+# For production, set variables in Vercel
+{code}
+{panel}
+
+h3. Issue 2: CORS Errors
+
+{panel:title=Cause|borderStyle=solid|borderColor=#dc3545|bgColor=#f8d7da}
+Missing CORS headers in API routes
+{panel}
+
+{panel:title=Solution|borderStyle=solid|borderColor=#28a745|bgColor=#d4edda}
+Ensure all API routes include:
+{code:language=typescript}
+res.setHeader('Access-Control-Allow-Origin', '*')
+res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
+{code}
+{panel}
+
+h3. Issue 3: Body Parsing Errors
+
+{panel:title=Cause|borderStyle=solid|borderColor=#dc3545|bgColor=#f8d7da}
+Vercel doesn't parse {{application/vnd.api+json}} by default
+{panel}
+
+{panel:title=Solution|borderStyle=solid|borderColor=#28a745|bgColor=#d4edda}
+Disable body parser and parse manually:
+{code:language=typescript}
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
+{code}
+{panel}
+
+h3. Issue 4: 401 Unauthorized
+
+{panel:title=Cause|borderStyle=solid|borderColor=#dc3545|bgColor=#f8d7da}
+Invalid or expired API key
+{panel}
+
+{panel:title=Solution|borderStyle=solid|borderColor=#28a745|bgColor=#d4edda}
+* Verify API key in TD console
+* Check key format: {{TD1 1/your-api-key-here}}
+* Ensure key has proper permissions
+{panel}
+
+h3. Issue 5: 404 Agent Not Found
+
+{panel:title=Cause|borderStyle=solid|borderColor=#dc3545|bgColor=#f8d7da}
+Invalid agent ID
+{panel}
+
+{panel:title=Solution|borderStyle=solid|borderColor=#28a745|bgColor=#d4edda}
+* Verify agent ID in TD Agent Builder
+* Ensure agent is published and active
+* Check agent ID format (UUID)
+{panel}
+
+----
+
+h2. ⭐ Best Practices
+
+h3. Security
+
+{warning:title=Security Best Practices}
+* ✅ Always use server-side API routes
+* ✅ Store credentials in environment variables
+* ✅ Use {{.env.local}} for local development (git-ignored)
+* ❌ Never expose API keys client-side
+* ❌ Never commit {{.env}} files to git
+{warning}
+
+h3. Performance
+
+{tip:title=Performance Tips}
+* ✅ Use streaming for better UX
+* ✅ Update UI incrementally as content arrives
+* ✅ Implement proper error handling
+* ✅ Abort long-running requests when needed
+{tip}
+
+h3. Code Organization
+
+{note:title=Organization Guidelines}
+* ✅ Separate service layer from UI components
+* ✅ Use TypeScript interfaces for type safety
+* ✅ Add comprehensive logging
+* ✅ Write unit tests for critical paths
+{note}
+
+----
+
+h2. ✅ Quick Start Checklist
+
+* [ ] Set up environment variables ({{.env}})
+* [ ] Create API proxy routes ({{pages/api/chats*.ts}})
+* [ ] Create client service ({{services/tdLlmService.ts}})
+* [ ] Update agent ID in service
+* [ ] Test chat session creation
+* [ ] Test message streaming
+* [ ] Implement error handling
+* [ ] Add file attachment support (if needed)
+* [ ] Deploy to production
+* [ ] Monitor logs and performance
+
+----
+
+h2. 💡 Key Takeaways
+
+{info:title=Key Points to Remember}
+# *Always use server-side proxy* - Never expose API keys to the browser
+# *Handle {{application/vnd.api+json}}* - Disable default body parser
+# *Stream responses* - Use SSE for better user experience
+# *Proper error handling* - Gracefully handle all error cases
+# *Type safety* - Use TypeScript interfaces throughout
+{info}
+
+----
+
+{panel:title=Document Info|borderStyle=solid|borderColor=#6c757d|bgColor=#f8f9fa}
+*Version:* 1.0.0
+*Created:* January 20, 2025
+*Support:* [TD Documentation|https://docs.treasuredata.com]
+{panel}

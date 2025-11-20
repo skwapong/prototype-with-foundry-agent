@@ -1,0 +1,34 @@
+{
+  "name": "prototype-with-foundry-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A starter template for building prototypes with Treasure Data Foundry Agents",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.17.9",
+    "dotenv": "^16.4.5",
+    "jspdf": "^3.0.3",
+    "lucide-react": "^0.460.0",
+    "next": "14.2.18",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "^3.4.1",
+    "td-stylekit": "^30.17.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}

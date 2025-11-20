@@ -1,0 +1,79 @@
+'use client';
+
+import { css } from '@emotion/react';
+import { usePathname } from 'next/navigation';
+import { useState, useCallback, ReactNode, isValidElement, cloneElement } from 'react';
+import LeftNavigation from './layout/LeftNavigation';
+import SecondaryNavigation from './layout/SecondaryNavigation';
+
+interface AppLayoutClientProps {
+  children: ReactNode;
+}
+
+export default function AppLayoutClient({ children }: AppLayoutClientProps) {
+  const pathname = usePathname();
+  const [chatIdToLoad, setChatIdToLoad] = useState<string | null>(null);
+  const [isSecondaryNavCollapsed, setIsSecondaryNavCollapsed] = useState(false);
+  const [isLeftNavExpanded, setIsLeftNavExpanded] = useState(false);
+
+  const handleLoadChat = useCallback((chatId: string) => {
+    console.log('📋 AppLayoutClient: Loading chat:', chatId);
+    setChatIdToLoad(chatId);
+  }, []);
+
+  const handleNewConversation = useCallback(() => {
+    console.log('🔙 AppLayoutClient: Setting chatIdToLoad to null (new conversation)');
+    setChatIdToLoad(null);
+  }, []);
+
+  const toggleSecondaryNav = useCallback(() => {
+    setIsSecondaryNavCollapsed(prev => !prev);
+  }, []);
+
+  // Determine if we should show the secondary navigation
+  const showSecondaryNav = pathname === '/campaign-hub';
+
+  // Clone children and inject props for campaign-hub
+  const childrenWithProps = showSecondaryNav && isValidElement(children)
+    ? cloneElement(children, {
+        chatIdToLoad,
+        onClearChat: handleNewConversation,
+        isLeftNavExpanded,
+      } as any)
+    : children;
+
+  return (
+    <div css={css`
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    `}>
+      {/* Left Navigation - 64px wide */}
+      <LeftNavigation
+        onExpandChange={setIsLeftNavExpanded}
+      />
+
+      {/* Secondary Navigation - 384px wide - only show on campaign-hub */}
+      {showSecondaryNav && (
+        <SecondaryNavigation
+          onLoadChat={handleLoadChat}
+          onNewConversation={handleNewConversation}
+          isCollapsed={isSecondaryNavCollapsed}
+          onToggleCollapse={toggleSecondaryNav}
+        />
+      )}
+
+      {/* Main Content Area */}
+      <main css={css`
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+      `}>
+        {childrenWithProps}
+      </main>
+    </div>
+  );
+}
