@@ -8,7 +8,7 @@ A complete, ready-to-use Next.js starter template for integrating Treasure Data 
 
 ```bash
 # Clone the repository
-git clone https://github.com/skwapong/paid-media-suite-demo.git td-agent-starter
+git clone https://github.com/skwapong/prototype-with-foundry-agent.git td-agent-starter
 
 # Navigate to the project
 cd td-agent-starter
@@ -682,7 +682,7 @@ Happy coding! 🚀
 ## 📞 Support
 
 - **Documentation**: Check the included guides
-- **Issues**: [GitHub Issues](https://github.com/skwapong/paid-media-suite-demo/issues)
+- **Issues**: [GitHub Issues](https://github.com/skwapong/prototype-with-foundry-agent/issues)
 - **TD Support**: Contact Treasure Data support team
 
 ---

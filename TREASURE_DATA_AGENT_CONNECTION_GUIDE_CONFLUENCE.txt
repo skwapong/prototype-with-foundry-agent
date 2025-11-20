@@ -16,7 +16,7 @@ h3. Option 1: Clone the Repository (Fastest)
 
 {code:language=bash}
 # Clone the complete working template
-git clone https://github.com/skwapong/paid-media-suite-demo.git my-td-agent-app
+git clone https://github.com/skwapong/prototype-with-foundry-agent.git my-td-agent-app
 cd my-td-agent-app
 
 # Install dependencies
@@ -45,7 +45,7 @@ npm run dev
 
 h3. Option 2: Download as ZIP
 
-Visit [https://github.com/skwapong/paid-media-suite-demo] and click *Code* → *Download ZIP*
+Visit [https://github.com/skwapong/prototype-with-foundry-agent] and click *Code* → *Download ZIP*
 
 h3. Option 3: Follow This Guide
 

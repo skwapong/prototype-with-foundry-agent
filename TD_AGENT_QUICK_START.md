@@ -7,7 +7,7 @@ Get up and running with Treasure Data Agents in 5 minutes!
 ### Option 1: Clone the Repo (Fastest)
 
 ```bash
-git clone https://github.com/skwapong/paid-media-suite-demo.git my-td-agent-app
+git clone https://github.com/skwapong/prototype-with-foundry-agent.git my-td-agent-app
 cd my-td-agent-app
 npm install
 ```
@@ -105,7 +105,7 @@ Set environment variables in Vercel dashboard:
 - Stream not working → Check `Accept: text/event-stream` header
 
 **Get Support:**
-- GitHub: https://github.com/skwapong/paid-media-suite-demo
+- GitHub: https://github.com/skwapong/prototype-with-foundry-agent
 - Documentation: Full guides included in repo
 
 ## ✅ Checklist

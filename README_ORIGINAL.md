@@ -28,8 +28,8 @@ This repository contains a **complete working implementation** and comprehensive
 
 ```bash
 # Clone the repository
-git clone https://github.com/skwapong/paid-media-suite-demo.git
-cd paid-media-suite-demo
+git clone https://github.com/skwapong/prototype-with-foundry-agent.git
+cd prototype-with-foundry-agent
 
 # Install dependencies
 npm install
@@ -336,7 +336,7 @@ Happy coding! 🚀
 
 ## 📞 Support & Contact
 
-- **Issues**: [GitHub Issues](https://github.com/skwapong/paid-media-suite-demo/issues)
+- **Issues**: [GitHub Issues](https://github.com/skwapong/prototype-with-foundry-agent/issues)
 - **Documentation**: See guides in this repository
 - **TD Support**: Contact Treasure Data support team
 
